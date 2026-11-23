@@ -1,4 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
+import {
+  generateAgendaFallback,
+  generateCampaignFallback,
+  generateSummaryFallback,
+} from "./fallbackGenerator";
 
 export async function askClaude(systemPrompt: string, userPrompt: string): Promise<string> {
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -73,63 +78,18 @@ export async function askClaude(systemPrompt: string, userPrompt: string): Promi
     }
   }
 
-  // 3. Fallback Mock response for local development when keys are not configured
-  console.warn("No active LLM API keys found. Returning mock response.");
-  
-  await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate latency
+  // 3. Dynamic local synthesis fallback when no external LLM API keys are configured
+  console.info("No active LLM API keys found. Using local synthesis fallback.");
+
+  await new Promise((resolve) => setTimeout(resolve, 600));
 
   if (systemPrompt.includes("communications specialist")) {
-    return `[MOCK - Add ANTHROPIC_API_KEY or GEMINI_API_KEY in .env.local to generate real messages]
-
-Subject: Launching our New Initiative: Let's Achieve Greatness Together!
-
-Dear Team,
-
-We are excited to share the upcoming plans for our new campaign. Over the next few weeks, we will be focusing on improving our internal alignment and customer outreach.
-
-Key Highlights:
-• Clear timelines and deliverables for each department.
-• Focus on user-centric updates.
-• Feedback loops to hear directly from our team.
-
-Let's make this campaign a massive success! If you have any questions, feel free to reach out to the project leads.
-
-Best regards,
-Internal Communications Team`;
+    return generateCampaignFallback(userPrompt);
   }
 
   if (systemPrompt.includes("meeting facilitator")) {
-    return `[MOCK - Add ANTHROPIC_API_KEY or GEMINI_API_KEY in .env.local to generate real agendas]
-
-# Meeting Agenda: Project Kickoff & Goal Setting
-**Objective:** Align on scope, roles, and project timeline.
-
-## Details
-* **Duration:** 60 minutes
-* **Attendees:** Engineering, Design, Product, and Marketing leads
-
-## Time Blocks
-* **00:00 - 00:10 (10m) | Welcome & Objective Setting**
-  * *Lead:* Facilitator
-  * *Goal:* Align on the core purpose of today's session.
-* **00:10 - 00:30 (20m) | Project Scope & Requirements Review**
-  * *Lead:* Product Management
-  * *Goal:* Confirm key features, timelines, and dependencies.
-* **00:30 - 00:50 (20m) | Role Assignments & Milestones**
-  * *Lead:* All Leads
-  * *Goal:* Agree on ownership of core tasks and delivery dates.
-* **00:50 - 01:00 (10m) | Next Steps & Q&A**
-  * *Lead:* All
-  * *Goal:* Review action items and confirm the next sync.`;
+    return generateAgendaFallback(userPrompt);
   }
 
-  return `[MOCK - Add ANTHROPIC_API_KEY or GEMINI_API_KEY in .env.local to generate real summaries]
-
-## Summary
-The team met to finalize the project roadmap and clear up current blockers. High-level alignment was achieved regarding user experience design, and the database schema changes were approved. 
-
-## Action Items
-* **Design Team:** Finalize high-fidelity mockups (Owner: Sarah, Due: Next Tuesday)
-* **Engineering Team:** Create initial database migration script (Owner: David, Due: This Friday)
-* **Product Team:** Update the product specification doc with feedback (Owner: Jordan, Due: Next Monday)`;
+  return generateSummaryFallback(userPrompt);
 }
